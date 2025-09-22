@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "my-stellar-conquest-app"
+location: "northamerica-northeast1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "my-stellar-conquest-app-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
