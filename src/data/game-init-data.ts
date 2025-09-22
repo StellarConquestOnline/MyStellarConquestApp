@@ -244,4 +244,3 @@ export const REGULAR_PRODUCTION_POINTS = 5;
 export const PRODUCTION_TURN_INTERVAL = 5; 
 
 
-    

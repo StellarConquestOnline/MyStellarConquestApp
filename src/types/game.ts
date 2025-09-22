@@ -1,14 +1,17 @@
-
 export interface HexPosition {
   col: number;
   row: number;
 }
 
-export type PlanetTypeShort = 'Terran' | 'Barren' | 'Sub Terran' | 'Minimal Terran';
+export type PlanetTypeShort =
+  | 'Terran'
+  | 'Barren'
+  | 'Sub Terran'
+  | 'Minimal Terran';
 
 export interface CommandPost {
-  id: string;       // Unique ID, e.g., `cmd_post_player1_initial`
-  owner: string;    // Player ID
+  id: string; // Unique ID, e.g., `cmd_post_player1_initial`
+  owner: string; // Player ID
   position: HexPosition;
 }
 
@@ -16,14 +19,26 @@ export interface Colony {
   id: string; // e.g., colony_sol_3_player1
   playerId: string;
   planetId: string; // The ID of the planet this colony is on
-  name: string; // e.g., "Sol III Main Colony" or "Ceti Alpha V Outpost"
-  population: number; // in millions - current population
-  productionPoints: number; // PP available at this colony for the current production turn
+  name: string; // e.g., "Sol III Main Colony"
+  population: number; // in millions
+  productionPoints: number; // PP available at this colony
   factoriesCount: number;
-  // Potentially other colony-specific structures or states
+
+  // New fields
+  defenses: {
+    missileDefense: number;
+    advancedMissileDefense: number;
+    planetaryShield: boolean;
+  };
+  productionBuildings: {
+    factory: number;
+    roboticFactory: number;
+  };
+  commandPost: boolean;
+  createdAt?: any; // Firestore timestamp
 }
 
-export interface Planet { // Renamed from PlanetType for clarity
+export interface Planet {
   id: string; // e.g. planet_sol_3
   name: string; // e.g. Earth
   type: PlanetTypeShort;
@@ -34,57 +49,54 @@ export interface Planet { // Renamed from PlanetType for clarity
 }
 
 export interface PlayerResources {
-  productionPoints: number; // For Turn 0, this is global. Later, PP is per-colony.
+  productionPoints: number;
   unassignedScouts: number;
   unassignedCorvettes: number;
   unassignedColonyTransports: number;
-  // Other global player resources if any
 }
 
 export interface Player {
   id: string;
   name: string;
   color: string;
-  resources: PlayerResources; // Global resources like unassigned ships, overall PP for Turn 0.
+  resources: PlayerResources;
   entryPointId?: string;
   originalConfigId: string;
-  researchedTechIds: string[]; // IDs of fully researched technologies
-  researchProgress: Record<string, number>; // Key: techId, Value: points accumulated
+  researchedTechIds: string[];
+  researchProgress: Record<string, number>;
+
+  // New
+  startingSystem?: string;
+  colonies?: Colony[];
 }
 
 export interface Fleet {
   id: string;
   owner: string; // Player ID
-  ships: { type: string; count: number }[]; // Use string for type to accommodate names from GameDataItem
+  ships: { type: string; count: number }[];
   position: HexPosition;
 }
 
-// Generic type for items from the JSON data
 export interface GameDataItem {
-  id: string; // Derived from Name, Quantity, IPCost, and original index to ensure uniqueness
-  PurchaseType: string; // "Ship", "Planetary", "Ship Speed Research", "Weapon Research", "Technology Research"
-  Level?: number | string; // Can be number or empty string
-  Quantity?: number | string; // Can be number or empty string
+  id: string;
+  PurchaseType: string;
+  Level?: number | string;
+  Quantity?: number | string;
   Name: string;
   IPCost: number;
   ResearchPrerequisite?: string;
-  DiscountPrerequisit?: string; // Note: Typo in original JSON "Prerequisit" -> Corrected to DiscountPrerequisit
-  DiscountPrice?: number | string; // Can be number or empty string
-  ShipSpeedBonus?: number | string; // Can be number or empty string
+  DiscountPrerequisit?: string;
+  DiscountPrice?: number | string;
+  ShipSpeedBonus?: number | string;
   Note?: string;
 }
 
-// Specific type for Research, derived from GameDataItem
 export interface ResearchData extends GameDataItem {
-  // id is inherited
   category: 'Ship Speed' | 'Weapon' | 'Technology' | 'Unknown';
-  level: number; // Normalized level
+  level: number;
 }
 
-// Specific type for Purchasable Ships/Planetary items
-export interface PurchasableItem extends GameDataItem {
-  // id is inherited
-}
+export interface PurchasableItem extends GameDataItem {}
 
 export interface StarSystem {
   id: string;
@@ -122,10 +134,10 @@ export interface GameState {
   starSystems: StarSystem[];
   fleets: Fleet[];
   commandPosts: CommandPost[];
-  gameDataItems: GameDataItem[]; // Holds all items from the JSON (includes research and purchasables)
+  gameDataItems: GameDataItem[];
   dustClouds: DustCloud[];
   entryPoints: EntryPoint[];
-  visualMapLabels: VisualMapLabel[]; // For arbitrary text labels on the map
+  visualMapLabels: VisualMapLabel[];
   mapSettings: {
     cols: number;
     rowsEven: number;
@@ -139,11 +151,18 @@ export type GameSessionData = {
   id: string;
   gameCode: string;
   hostPlayerId: string;
-  status: string; // e.g., 'Awaiting Players', 'In Progress', 'Ended', 'Cancelled'
-  players: { playerId: string; name: string; color: string; originalConfigId: string; }[];
+  status: string;
+  players: {
+    playerId: string;
+    name: string;
+    color: string;
+    originalConfigId: string;
+    colonies?: Colony[];
+    startingSystem?: string;
+  }[];
   isPrivate: boolean;
-  createdAt: any; // Firestore Timestamp
-  playerOrder?: string[]; // Array of player IDs in turn order
+  createdAt: any;
+  playerOrder?: string[];
   turn?: number;
   currentPlayerId?: string | null;
 };
