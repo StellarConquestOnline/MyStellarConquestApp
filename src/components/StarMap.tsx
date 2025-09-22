@@ -91,6 +91,7 @@ export function getStarSvgFillColor(colorName?: string): string {
     case "yellow": return "rgb(255, 235, 0)";
     case "green": return "rgb(0, 156, 0)";
     case "blue": return "rgb(0, 107, 237)";
+	case "white": return "rgb(255, 255, 255)";
     default: return "rgb(220, 220, 220)";
   }
 }
@@ -432,7 +433,7 @@ const StarMap: React.FC<StarMapProps> = ({
               </Hexagon>
             );
           })}
-		  
+
           {fleets.map((fleet) => {
              if (!isHexVisible(fleet.position.col, fleet.position.row, mapSettings)) {
                 return null;
